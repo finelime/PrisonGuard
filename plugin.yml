@@ -1,0 +1,8 @@
+name: PrisonGuard
+main: com.pwncraftpvp.prisonguard.core.Main
+description: Prison Guards!
+author: JjPwN1
+version: 1.0
+commands:
+   guard:
+      description: PrisonGuard main command
