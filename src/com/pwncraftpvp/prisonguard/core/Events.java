@@ -10,6 +10,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
+import com.pwncraftpvp.classes.core.CPlayer;
+import com.pwncraftpvp.classes.utils.ClassType;
+
 public class Events implements Listener{
 	
 	Main main = Main.getInstance();
@@ -42,15 +45,34 @@ public class Events implements Listener{
 							}
 						}
 						if(hasIllegalItems == true){
-							for(int x = 0; x <= 8; x++){
-								if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
-									for(ItemStack i : Utils.getIllegalItems()){
-										try{
-											if(i.getType() == player.getInventory().getItem(x).getType()){
-												player.getInventory().setItem(x, null);
+							if(main.getServer().getPluginManager().getPlugin("Classes") != null){
+								CPlayer cplayer = new CPlayer(player);
+								if(cplayer.getClassType() != ClassType.NINJA){
+									for(int x = 0; x <= 8; x++){
+										if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
+											for(ItemStack i : Utils.getIllegalItems()){
+												try{
+													if(i.getType() == player.getInventory().getItem(x).getType()){
+														player.getInventory().setItem(x, null);
+													}
+												}catch (NullPointerException ex){
+													
+												}
 											}
-										}catch (NullPointerException ex){
-											
+										}
+									}
+								}
+							}else{
+								for(int x = 0; x <= 8; x++){
+									if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
+										for(ItemStack i : Utils.getIllegalItems()){
+											try{
+												if(i.getType() == player.getInventory().getItem(x).getType()){
+													player.getInventory().setItem(x, null);
+												}
+											}catch (NullPointerException ex){
+												
+											}
 										}
 									}
 								}
