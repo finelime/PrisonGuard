@@ -179,4 +179,27 @@ public class Utils {
 	public static int getJailBlocksToMine(){
 		return main.getConfig().getInt("jail.blocksToMine");
 	}
+	
+	/**
+	 * Get a list of worlds guards can jail players in
+	 * @return - The list of worlds guards can jail players in
+	 */
+	public static List<World> getJailableWorlds(){
+		List<World> worlds = new ArrayList<World>();
+		for(String s : main.getConfig().getStringList("jail.worldsList")){
+			worlds.add(Bukkit.getWorld(s));
+		}
+		return worlds;
+	}
+	
+	public static boolean canJailInWorld(World world){
+		boolean can = false;
+		for(World w : getJailableWorlds()){
+			if(world.getName().equalsIgnoreCase(w.getName())){
+				can = true;
+				break;
+			}
+		}
+		return can;
+	}
 }

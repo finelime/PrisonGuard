@@ -164,5 +164,24 @@ public class PrisonPlayer {
 			player.teleport(Utils.getJailReturnLocation());
 		}
 	}
+	
+	/**
+	 * Remove any illegal items from the player's hotbar
+	 */
+	public void removeIllegalItems(){
+		for(int x = 0; x <= 8; x++){
+			if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
+				for(ItemStack i : Utils.getIllegalItems()){
+					try{
+						if(i.getType() == player.getInventory().getItem(x).getType()){
+							player.getInventory().setItem(x, null);
+						}
+					}catch (NullPointerException ex){
+						
+					}
+				}
+			}
+		}
+	}
 
 }

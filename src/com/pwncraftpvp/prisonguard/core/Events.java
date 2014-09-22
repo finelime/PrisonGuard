@@ -28,64 +28,68 @@ public class Events implements Listener{
 			PrisonPlayer pplayer = new PrisonPlayer(player);
 			if(main.guards.contains(damager.getName())){
 				event.setCancelled(true);
-				if(!main.guards.contains(player.getName())){
-					if(!main.jailed.containsKey(player.getName())){
-						boolean hasIllegalItems = false;
-						for(int x = 0; x <= 8; x++){
-							if(hasIllegalItems == true){
-								break;
-							}
-							if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
-								for(ItemStack i : Utils.getIllegalItems()){
-									if(i.getType() == player.getInventory().getItem(x).getType()){
-										hasIllegalItems = true;
-										break;
-									}
+				if(Utils.canJailInWorld(damager.getWorld()) == true){
+					if(!main.guards.contains(player.getName())){
+						if(!main.jailed.containsKey(player.getName())){
+							boolean hasIllegalItems = false;
+							for(int x = 0; x <= 8; x++){
+								if(hasIllegalItems == true){
+									break;
 								}
-							}
-						}
-						if(hasIllegalItems == true){
-							if(main.getServer().getPluginManager().getPlugin("Classes") != null){
-								CPlayer cplayer = new CPlayer(player);
-								if(cplayer.getClassType() != ClassType.NINJA){
-									pplayer.removeIllegalItems();
-								}else{
-									boolean hasJailPass = false;
-									for(int x = 0; x <= 35; x++){
-										if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
-											ItemStack item = player.getInventory().getItem(x);
-											if(item.getType() == Material.PAPER && item.getItemMeta().getDisplayName() != null && item.getItemMeta().getDisplayName().equalsIgnoreCase(yellow + "Jail Pass")){
-												hasJailPass = true;
-												if(item.getAmount() == 1){
-													player.getInventory().setItem(x, null);
-												}else if(item.getAmount() > 1){
-													player.getInventory().getItem(x).setAmount(player.getInventory().getItem(x).getAmount() - 1);
-												}
-												break;
-											}
+								if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
+									for(ItemStack i : Utils.getIllegalItems()){
+										if(i.getType() == player.getInventory().getItem(x).getType()){
+											hasIllegalItems = true;
+											break;
 										}
 									}
-									if(hasJailPass == false){
-										pplayer.removeIllegalItems();
-									}
 								}
-							}else{
-								pplayer.removeIllegalItems();
 							}
-							pplayer.sendToJail();
-							pplayer.sendMessage("You have been sent to jail by " + yellow + damager.getName() + gray + "!");
-							pdamager.sendMessage("You have sent " + yellow + player.getName() + gray + " to jail!");
-							pdamager.setJails(pdamager.getJails() + 1);
+							if(hasIllegalItems == true){
+								if(main.getServer().getPluginManager().getPlugin("Classes") != null){
+									CPlayer cplayer = new CPlayer(player);
+									if(cplayer.getClassType() != ClassType.NINJA){
+										pplayer.removeIllegalItems();
+									}else{
+										boolean hasJailPass = false;
+										for(int x = 0; x <= 35; x++){
+											if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
+												ItemStack item = player.getInventory().getItem(x);
+												if(item.getType() == Material.PAPER && item.getItemMeta().getDisplayName() != null && item.getItemMeta().getDisplayName().equalsIgnoreCase(yellow + "Jail Pass")){
+													hasJailPass = true;
+													if(item.getAmount() == 1){
+														player.getInventory().setItem(x, null);
+													}else if(item.getAmount() > 1){
+														player.getInventory().getItem(x).setAmount(player.getInventory().getItem(x).getAmount() - 1);
+													}
+													break;
+												}
+											}
+										}
+										if(hasJailPass == false){
+											pplayer.removeIllegalItems();
+										}
+									}
+								}else{
+									pplayer.removeIllegalItems();
+								}
+								pplayer.sendToJail();
+								pplayer.sendMessage("You have been sent to jail by " + yellow + damager.getName() + gray + "!");
+								pdamager.sendMessage("You have sent " + yellow + player.getName() + gray + " to jail!");
+								pdamager.setJails(pdamager.getJails() + 1);
+							}else{
+								pdamager.setStrikes(pdamager.getStrikes() + 1);
+								pdamager.sendError("This player does not have any illegal items!");
+								pdamager.sendError("You have received a strike!");
+							}
 						}else{
-							pdamager.setStrikes(pdamager.getStrikes() + 1);
-							pdamager.sendError("This player does not have any illegal items!");
-							pdamager.sendError("You have received a strike!");
+							pdamager.sendError("This player is already in jail!");
 						}
 					}else{
-						pdamager.sendError("This player is already in jail!");
+						pdamager.sendError("This player is also a guard!");
 					}
 				}else{
-					pdamager.sendError("This player is also a guard!");
+					pdamager.sendError("You may not jail people in this world!");
 				}
 			}
 		}

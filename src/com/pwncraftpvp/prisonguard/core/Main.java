@@ -29,6 +29,15 @@ public class Main extends JavaPlugin{
 	public void onEnable(){
 		instance = this;
 		this.getServer().getPluginManager().registerEvents(new Events(), this);
+		if(this.getConfig().getBoolean("doNotChangeMe") == false){
+			List<String> examples = new ArrayList<String>();
+			examples.add("world");
+			examples.add("world_nether");
+			examples.add("world_the_end");
+			this.getConfig().set("jail.worldsList", examples);
+			this.getConfig().set("doNotChangeMe", true);
+			this.saveConfig();
+		}
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
@@ -81,9 +90,13 @@ public class Main extends JavaPlugin{
 					}
 				}else{
 					if(player.hasPermission("guard.use")){
-						pplayer.setGuardInventory();
-						guards.add(player.getName());
-						pplayer.sendMessage("You have been given the guard kit!");
+						if(Utils.canJailInWorld(player.getWorld()) == true){
+							pplayer.setGuardInventory();
+							guards.add(player.getName());
+							pplayer.sendMessage("You have been given the guard kit!");
+						}else{
+							pplayer.sendError("You may not be a guard in this world!");
+						}
 					}else{
 						pplayer.sendError("You do not have permission to do this!");
 					}
