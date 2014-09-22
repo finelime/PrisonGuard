@@ -38,13 +38,17 @@ public class Main extends JavaPlugin{
 			if(cmd.getName().equalsIgnoreCase("guard")){
 				if(args.length > 0){
 					if(args[0].equalsIgnoreCase("check")){
-						if(args.length == 2){
-							PrisonPlayer checkPlayer = new PrisonPlayer(args[1]);
-							pplayer.sendMessageHeader("Guard Check");
-							pplayer.sendMessage("Strikes: " + yellow + checkPlayer.getStrikes());
-							pplayer.sendMessage("Jails: " + yellow + checkPlayer.getJails());
+						if(player.hasPermission("guard.check")){
+							if(args.length == 2){
+								PrisonPlayer checkPlayer = new PrisonPlayer(args[1]);
+								pplayer.sendMessageHeader("Guard Check");
+								pplayer.sendMessage("Strikes: " + yellow + checkPlayer.getStrikes());
+								pplayer.sendMessage("Jails: " + yellow + checkPlayer.getJails());
+							}else{
+								pplayer.sendError("Usage: /guard check <player>");
+							}
 						}else{
-							pplayer.sendError("Usage: /guard check <player>");
+							pplayer.sendError("You do not have permission to check strikes!");
 						}
 					}else if(args[0].equalsIgnoreCase("setillegalitems")){
 						Utils.setIllegalItems(player);
@@ -76,9 +80,13 @@ public class Main extends JavaPlugin{
 						pplayer.sendCommandHelp();
 					}
 				}else{
-					pplayer.setGuardInventory();
-					guards.add(player.getName());
-					pplayer.sendMessage("You have been given the guard kit!");
+					if(player.hasPermission("guard.use")){
+						pplayer.setGuardInventory();
+						guards.add(player.getName());
+						pplayer.sendMessage("You have been given the guard kit!");
+					}else{
+						pplayer.sendError("You do not have permission to do this!");
+					}
 				}
 			}
 		}

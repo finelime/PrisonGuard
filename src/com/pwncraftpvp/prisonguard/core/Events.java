@@ -48,34 +48,29 @@ public class Events implements Listener{
 							if(main.getServer().getPluginManager().getPlugin("Classes") != null){
 								CPlayer cplayer = new CPlayer(player);
 								if(cplayer.getClassType() != ClassType.NINJA){
-									for(int x = 0; x <= 8; x++){
+									pplayer.removeIllegalItems();
+								}else{
+									boolean hasJailPass = false;
+									for(int x = 0; x <= 35; x++){
 										if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
-											for(ItemStack i : Utils.getIllegalItems()){
-												try{
-													if(i.getType() == player.getInventory().getItem(x).getType()){
-														player.getInventory().setItem(x, null);
-													}
-												}catch (NullPointerException ex){
-													
+											ItemStack item = player.getInventory().getItem(x);
+											if(item.getType() == Material.PAPER && item.getItemMeta().getDisplayName() != null && item.getItemMeta().getDisplayName().equalsIgnoreCase(yellow + "Jail Pass")){
+												hasJailPass = true;
+												if(item.getAmount() == 1){
+													player.getInventory().setItem(x, null);
+												}else if(item.getAmount() > 1){
+													player.getInventory().getItem(x).setAmount(player.getInventory().getItem(x).getAmount() - 1);
 												}
+												break;
 											}
 										}
+									}
+									if(hasJailPass == false){
+										pplayer.removeIllegalItems();
 									}
 								}
 							}else{
-								for(int x = 0; x <= 8; x++){
-									if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
-										for(ItemStack i : Utils.getIllegalItems()){
-											try{
-												if(i.getType() == player.getInventory().getItem(x).getType()){
-													player.getInventory().setItem(x, null);
-												}
-											}catch (NullPointerException ex){
-												
-											}
-										}
-									}
-								}
+								pplayer.removeIllegalItems();
 							}
 							pplayer.sendToJail();
 							pplayer.sendMessage("You have been sent to jail by " + yellow + damager.getName() + gray + "!");
