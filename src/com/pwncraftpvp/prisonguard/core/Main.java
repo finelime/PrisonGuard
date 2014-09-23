@@ -90,12 +90,18 @@ public class Main extends JavaPlugin{
 					}
 				}else{
 					if(player.hasPermission("guard.use")){
-						if(Utils.canJailInWorld(player.getWorld()) == true){
-							pplayer.setGuardInventory();
-							guards.add(player.getName());
-							pplayer.sendMessage("You have been given the guard kit!");
+						if(!guards.contains(player.getName())){
+							if(Utils.canJailInWorld(player.getWorld()) == true){
+								pplayer.switchToGuardInventory();
+								guards.add(player.getName());
+								pplayer.sendMessage("You have become a guard!");
+							}else{
+								pplayer.sendError("You may not be a guard in this world!");
+							}
 						}else{
-							pplayer.sendError("You may not be a guard in this world!");
+							pplayer.switchToSavedInventory(InventorySaveType.REGULAR);
+							guards.remove(player.getName());
+							pplayer.sendMessage("You have resigned from the guard status!");
 						}
 					}else{
 						pplayer.sendError("You do not have permission to do this!");

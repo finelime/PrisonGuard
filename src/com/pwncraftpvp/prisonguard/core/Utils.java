@@ -79,12 +79,25 @@ public class Utils {
 	 * @param player - The player to copy the inventory from
 	 */
 	public static void setGuardKit(Player player){
+		main.getConfig().set("guardKit", null);
 		for(int x = 1; x <= player.getInventory().getSize(); x++){
 			int slot = (x - 1);
 			if(player.getInventory().getItem(slot) != null && player.getInventory().getItem(slot).getType() != Material.AIR){
 				ItemStack item = player.getInventory().getItem(slot);
 				main.getConfig().set("guardKit." + slot + ".item", item);
 			}
+		}
+		if(player.getInventory().getHelmet() != null && player.getInventory().getHelmet().getType() != Material.AIR){
+			main.getConfig().set("guardKit.armor.helmet", player.getInventory().getHelmet());
+		}
+		if(player.getInventory().getChestplate() != null && player.getInventory().getChestplate().getType() != Material.AIR){
+			main.getConfig().set("guardKit.armor.chestplate", player.getInventory().getChestplate());
+		}
+		if(player.getInventory().getLeggings() != null && player.getInventory().getLeggings().getType() != Material.AIR){
+			main.getConfig().set("guardKit.armor.leggings", player.getInventory().getLeggings());
+		}
+		if(player.getInventory().getBoots() != null && player.getInventory().getBoots().getType() != Material.AIR){
+			main.getConfig().set("guardKit.armor.boots", player.getInventory().getBoots());
 		}
 		main.saveConfig();
 	}
@@ -99,6 +112,18 @@ public class Utils {
 			if(main.getConfig().getItemStack("guardKit." + x + ".item") != null && main.getConfig().getItemStack("guardKit." + x + ".item").getType() != Material.AIR){
 				kit.add(main.getConfig().getItemStack("guardKit." + x + ".item"));
 			}
+		}
+		if(main.getConfig().getItemStack("guardKit.armor.helmet") != null){
+			kit.add(main.getConfig().getItemStack("guardKit.armor.helmet"));
+		}
+		if(main.getConfig().getItemStack("guardKit.armor.chestplate") != null){
+			kit.add(main.getConfig().getItemStack("guardKit.armor.chestplate"));
+		}
+		if(main.getConfig().getItemStack("guardKit.armor.leggings") != null){
+			kit.add(main.getConfig().getItemStack("guardKit.armor.leggings"));
+		}
+		if(main.getConfig().getItemStack("guardKit.armor.boots") != null){
+			kit.add(main.getConfig().getItemStack("guardKit.armor.boots"));
 		}
 		return kit;
 	}

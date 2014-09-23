@@ -137,12 +137,95 @@ public class PrisonPlayer {
 	}
 	
 	/**
+	 * Save the player's regular inventory to their player file
+	 * @param type - The inventory save type
+	 */
+	public void saveInventory(InventorySaveType type){
+		this.clearSavedInventory(type);
+		for(int x = 0; x <= 35; x++){
+			if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
+				ItemStack item = player.getInventory().getItem(x);
+				this.setConfigValue("cachedInventory." + type.toString().toLowerCase() + "." + x + ".item", item);
+			}
+		}
+		if(player.getInventory().getHelmet() != null && player.getInventory().getHelmet().getType() != Material.AIR){
+			this.setConfigValue("cachedInventory." + type.toString().toLowerCase() + ".armor.helmet", player.getInventory().getHelmet());
+		}
+		if(player.getInventory().getChestplate() != null && player.getInventory().getChestplate().getType() != Material.AIR){
+			this.setConfigValue("cachedInventory." + type.toString().toLowerCase() + ".armor.chestplate", player.getInventory().getChestplate());
+		}
+		if(player.getInventory().getLeggings() != null && player.getInventory().getLeggings().getType() != Material.AIR){
+			this.setConfigValue("cachedInventory." + type.toString().toLowerCase() + ".armor.leggings", player.getInventory().getLeggings());
+		}
+		if(player.getInventory().getBoots() != null && player.getInventory().getBoots().getType() != Material.AIR){
+			this.setConfigValue("cachedInventory." + type.toString().toLowerCase() + ".armor.boots", player.getInventory().getBoots());
+		}
+	}
+	
+	/**
+	 * Set the player's inventory to their regular inventory
+	 * @param type - The inventory save type
+	 */
+	public void switchToSavedInventory(InventorySaveType type){
+		player.getInventory().clear();
+		player.getInventory().setHelmet(null);
+		player.getInventory().setChestplate(null);
+		player.getInventory().setLeggings(null);
+		player.getInventory().setBoots(null);
+		for(int x = 0; x <= 35; x++){
+			if(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + "." + x + ".item") != null){
+				player.getInventory().setItem(x, this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + "." + x + ".item"));
+			}
+		}
+		if(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.helmet") != null){
+			player.getInventory().setHelmet(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.helmet"));
+		}
+		if(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.chestplate") != null){
+			player.getInventory().setChestplate(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.chestplate"));
+		}
+		if(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.leggings") != null){
+			player.getInventory().setLeggings(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.leggings"));
+		}
+		if(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.boots") != null){
+			player.getInventory().setBoots(this.getConfig().getItemStack("cachedInventory." + type.toString().toLowerCase() + ".armor.boots"));
+		}
+		player.updateInventory();
+		this.clearSavedInventory(type);
+	}
+	
+	/**
+	 * Clear the player's cached regular inventory
+	 * @param type - The inventory save type
+	 */
+	public void clearSavedInventory(InventorySaveType type){
+		this.setConfigValue("cachedInventory." + type.toString().toLowerCase(), null);
+	}
+	
+	/**
 	 * Set the player's inventory to the guard inventory
 	 */
-	public void setGuardInventory(){
+	public void switchToGuardInventory(){
+		this.saveInventory(InventorySaveType.REGULAR);
 		player.getInventory().clear();
+		player.getInventory().setHelmet(null);
+		player.getInventory().setChestplate(null);
+		player.getInventory().setLeggings(null);
+		player.getInventory().setBoots(null);
 		for(ItemStack i : Utils.getGuardKit()){
-			player.getInventory().addItem(i);
+			String itemName = i.getType().toString().toLowerCase();
+			if(!itemName.contains("helmet") && !itemName.contains("chestplate") && !itemName.contains("leggings") && !itemName.contains("boots")){
+				player.getInventory().addItem(i);
+			}else{
+				if(itemName.contains("helmet")){
+					player.getInventory().setHelmet(i);
+				}else if(itemName.contains("chestplate")){
+					player.getInventory().setChestplate(i);
+				}else if(itemName.contains("leggings")){
+					player.getInventory().setLeggings(i);
+				}else if(itemName.contains("boots")){
+					player.getInventory().setBoots(i);
+				}
+			}
 		}
 	}
 	
@@ -150,8 +233,16 @@ public class PrisonPlayer {
 	 * Send the player to jail
 	 */
 	public void sendToJail(){
+		this.saveInventory(InventorySaveType.JAIL);
+		player.getInventory().clear();
+		player.getInventory().setHelmet(null);
+		player.getInventory().setChestplate(null);
+		player.getInventory().setLeggings(null);
+		player.getInventory().setBoots(null);
 		player.teleport(Utils.getJailSpawn());
-		player.getInventory().addItem(new ItemStack(Material.STONE_PICKAXE));
+		for(int x = 1; x <= 5; x++){
+			player.getInventory().addItem(new ItemStack(Material.STONE_PICKAXE));
+		}
 		main.jailed.put(player.getName(), 0);
 	}
 	
@@ -162,6 +253,7 @@ public class PrisonPlayer {
 		if(main.jailed.containsKey(player.getName())){
 			main.jailed.remove(player.getName());
 			player.teleport(Utils.getJailReturnLocation());
+			this.switchToSavedInventory(InventorySaveType.JAIL);
 		}
 	}
 	
