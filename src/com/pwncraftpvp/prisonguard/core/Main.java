@@ -10,11 +10,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.pwncraftpvp.prisonguard.tasks.ProvokedTask;
+import com.pwncraftpvp.prisonguard.utils.Utils;
+
 public class Main extends JavaPlugin{
 	
 	private static Main instance;
 	public List<String> guards = new ArrayList<String>();
+	public List<String> combat = new ArrayList<String>();
 	public HashMap<String, Integer> jailed = new HashMap<String, Integer>();
+	public HashMap<String, String> provoked = new HashMap<String, String>();
+	public HashMap<String, ProvokedTask> provokedTasks = new HashMap<String, ProvokedTask>();
 	//private String gray = ChatColor.GRAY + "";
 	private String yellow = ChatColor.YELLOW + "";
 	
@@ -43,13 +49,13 @@ public class Main extends JavaPlugin{
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
 		if(sender instanceof Player){
 			Player player = (Player) sender;
-			PrisonPlayer pplayer = new PrisonPlayer(player);
+			PPlayer pplayer = new PPlayer(player);
 			if(cmd.getName().equalsIgnoreCase("guard")){
 				if(args.length > 0){
 					if(args[0].equalsIgnoreCase("check")){
 						if(player.hasPermission("guard.check")){
 							if(args.length == 2){
-								PrisonPlayer checkPlayer = new PrisonPlayer(args[1]);
+								PPlayer checkPlayer = new PPlayer(args[1]);
 								pplayer.sendMessageHeader("Guard Check");
 								pplayer.sendMessage("Strikes: " + yellow + checkPlayer.getStrikes());
 								pplayer.sendMessage("Jails: " + yellow + checkPlayer.getJails());
@@ -90,18 +96,22 @@ public class Main extends JavaPlugin{
 					}
 				}else{
 					if(player.hasPermission("guard.use")){
-						if(!guards.contains(player.getName())){
-							if(Utils.canJailInWorld(player.getWorld()) == true){
-								pplayer.switchToGuardInventory();
-								guards.add(player.getName());
-								pplayer.sendMessage("You have become a guard!");
+						if(!combat.contains(player.getName())){
+							if(!guards.contains(player.getName())){
+								if(Utils.canJailInWorld(player.getWorld()) == true){
+									pplayer.switchToGuardInventory();
+									guards.add(player.getName());
+									pplayer.sendMessage("You have become a guard!");
+								}else{
+									pplayer.sendError("You may not be a guard in this world!");
+								}
 							}else{
-								pplayer.sendError("You may not be a guard in this world!");
+								pplayer.switchToSavedInventory(InventorySaveType.REGULAR);
+								guards.remove(player.getName());
+								pplayer.sendMessage("You have resigned from the guard status!");
 							}
 						}else{
-							pplayer.switchToSavedInventory(InventorySaveType.REGULAR);
-							guards.remove(player.getName());
-							pplayer.sendMessage("You have resigned from the guard status!");
+							pplayer.sendError("You may not use this command while in combat!");
 						}
 					}else{
 						pplayer.sendError("You do not have permission to do this!");
