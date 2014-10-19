@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.pwncraftpvp.prisonguard.tasks.CombatTask;
 import com.pwncraftpvp.prisonguard.tasks.ProvokedTask;
 import com.pwncraftpvp.prisonguard.utils.Utils;
 
@@ -17,11 +18,11 @@ public class Main extends JavaPlugin{
 	
 	private static Main instance;
 	public List<String> guards = new ArrayList<String>();
-	public List<String> combat = new ArrayList<String>();
 	public HashMap<String, Integer> jailed = new HashMap<String, Integer>();
 	public HashMap<String, String> provoked = new HashMap<String, String>();
 	public HashMap<String, ProvokedTask> provokedTasks = new HashMap<String, ProvokedTask>();
-	//private String gray = ChatColor.GRAY + "";
+	public HashMap<String, CombatTask> combat = new HashMap<String, CombatTask>();
+	private String gray = ChatColor.GRAY + "";
 	private String yellow = ChatColor.YELLOW + "";
 	
 	/**
@@ -96,7 +97,7 @@ public class Main extends JavaPlugin{
 					}
 				}else{
 					if(player.hasPermission("guard.use")){
-						if(!combat.contains(player.getName())){
+						if(!combat.containsKey(player.getName())){
 							if(!guards.contains(player.getName())){
 								if(Utils.canJailInWorld(player.getWorld()) == true){
 									pplayer.switchToGuardInventory();
@@ -116,6 +117,17 @@ public class Main extends JavaPlugin{
 					}else{
 						pplayer.sendError("You do not have permission to do this!");
 					}
+				}
+			}else if(cmd.getName().equalsIgnoreCase("ct") || cmd.getName().equalsIgnoreCase("tag")){
+				if(combat.containsKey(player.getName())){
+					int timeleft = combat.get(player.getName()).getMaxTime() - combat.get(player.getName()).getCurrentTime();
+					String s = "s";
+					if(timeleft == 1){
+						s = "";
+					}
+					pplayer.sendMessage("You will remain in combat for the next " + yellow + timeleft + gray + " second" + s + "!");
+				}else{
+					pplayer.sendError("You are not in combat!");
 				}
 			}
 		}

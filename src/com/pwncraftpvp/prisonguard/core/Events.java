@@ -19,7 +19,9 @@ import org.bukkit.inventory.ItemStack;
 
 import com.pwncraftpvp.classes.core.CPlayer;
 import com.pwncraftpvp.classes.utils.ClassType;
+import com.pwncraftpvp.prisonguard.tasks.CombatTask;
 import com.pwncraftpvp.prisonguard.tasks.ProvokedTask;
+import com.pwncraftpvp.prisonguard.utils.UTFUtils;
 import com.pwncraftpvp.prisonguard.utils.Utils;
 
 public class Events implements Listener{
@@ -36,6 +38,22 @@ public class Events implements Listener{
 			PPlayer pdamager = new PPlayer(damager);
 			final Player player = (Player) event.getEntity();
 			PPlayer pplayer = new PPlayer(player);
+			if(Utils.canPvP(event.getEntity().getLocation()) == true && Utils.canPvP(event.getDamager().getLocation()) == true){
+				if(!main.combat.containsKey(player.getName())){
+					CombatTask task = new CombatTask(player);
+					task.runTaskTimer(main, 0, 20);
+					main.combat.put(player.getName(), task);
+				}else{
+					main.combat.get(player.getName()).setCurrentTime(0);
+				}
+				if(!main.combat.containsKey(damager.getName())){
+					CombatTask task = new CombatTask(damager);
+					task.runTaskTimer(main, 0, 20);
+					main.combat.put(damager.getName(), task);
+				}else{
+					main.combat.get(damager.getName()).setCurrentTime(0);
+				}
+			}
 			if(main.guards.contains(damager.getName())){
 				if(damager.getItemInHand().getType() == Material.WOOD_HOE){
 					event.setCancelled(true);
@@ -49,7 +67,7 @@ public class Events implements Listener{
 									}
 									if(player.getInventory().getItem(x) != null && player.getInventory().getItem(x).getType() != Material.AIR){
 										for(ItemStack i : Utils.getIllegalItems()){
-											if(i.getType() == player.getInventory().getItem(x).getType()){
+											if(i.getType() == player.getInventory().getItem(x).getType() && i.getData().getData() == player.getInventory().getItem(x).getData().getData()){
 												hasIllegalItems = true;
 												break;
 											}
@@ -105,41 +123,31 @@ public class Events implements Listener{
 					}else{
 						pdamager.sendError("You may not jail people in this world!");
 					}
-				}else{
-					if(!main.combat.contains(player.getName())){
-						main.combat.add(player.getName());
-						main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
-							public void run(){
-								main.combat.remove(player.getName());
-							}
-						}, 300);
-					}
-					if(!main.combat.contains(damager.getName())){
-						main.combat.add(damager.getName());
-						main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
-							public void run(){
-								main.combat.remove(damager.getName());
-							}
-						}, 300);
-					}
 				}
 			}
 			if(main.guards.contains(damager.getName()) && !main.guards.contains(player.getName())){
 				if(!main.provoked.containsKey(damager.getName())){
 					event.setCancelled(true);
-					pdamager.sendError("You cannot attack players unless they attack you!");
 				}else if(main.provoked.containsKey(damager.getName())){
 					if(!main.provoked.get(damager.getName()).equalsIgnoreCase(player.getName())){
-						pdamager.sendError("You cannot attack players unless they attack you!");
+						event.setCancelled(true);
 					}
 				}
 			}
 			
 			if(main.guards.contains(player.getName()) && !main.guards.contains(damager.getName())){
-				player.getInventory().getHelmet().setDurability((short) 0);
-				player.getInventory().getChestplate().setDurability((short) 0);
-				player.getInventory().getLeggings().setDurability((short) 0);
-				player.getInventory().getBoots().setDurability((short) 0);
+				if(player.getInventory().getHelmet() != null){
+					player.getInventory().getHelmet().setDurability((short) 0);
+				}
+				if(player.getInventory().getChestplate() != null){
+					player.getInventory().getChestplate().setDurability((short) 0);
+				}
+				if(player.getInventory().getLeggings() != null){
+					player.getInventory().getLeggings().setDurability((short) 0);
+				}
+				if(player.getInventory().getBoots() != null){
+					player.getInventory().getBoots().setDurability((short) 0);
+				}
 				
 				if(!main.provoked.containsKey(player.getName())){
 					ProvokedTask task = new ProvokedTask(player, damager);
@@ -161,21 +169,21 @@ public class Events implements Listener{
 				final Player damager = (Player) proj.getShooter();
 				PPlayer pdamager = new PPlayer(damager);
 				
-				if(!main.combat.contains(player.getName())){
-					main.combat.add(player.getName());
-					main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
-						public void run(){
-							main.combat.remove(player.getName());
-						}
-					}, 300);
-				}
-				if(!main.combat.contains(damager.getName())){
-					main.combat.add(damager.getName());
-					main.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable(){
-						public void run(){
-							main.combat.remove(damager.getName());
-						}
-					}, 300);
+				if(Utils.canPvP(event.getEntity().getLocation()) == true && Utils.canPvP(damager.getLocation()) == true){
+					if(!main.combat.containsKey(player.getName())){
+						CombatTask task = new CombatTask(player);
+						task.runTaskTimer(main, 0, 20);
+						main.combat.put(player.getName(), task);
+					}else{
+						main.combat.get(player.getName()).setCurrentTime(0);
+					}
+					if(!main.combat.containsKey(damager.getName())){
+						CombatTask task = new CombatTask(damager);
+						task.runTaskTimer(main, 0, 20);
+						main.combat.put(damager.getName(), task);
+					}else{
+						main.combat.get(damager.getName()).setCurrentTime(0);
+					}
 				}
 				
 				if(main.guards.contains(damager.getName()) && !main.guards.contains(player.getName())){
@@ -190,10 +198,18 @@ public class Events implements Listener{
 				}
 				
 				if(main.guards.contains(player.getName()) && !main.guards.contains(damager.getName())){
-					player.getInventory().getHelmet().setDurability((short) 0);
-					player.getInventory().getChestplate().setDurability((short) 0);
-					player.getInventory().getLeggings().setDurability((short) 0);
-					player.getInventory().getBoots().setDurability((short) 0);
+					if(player.getInventory().getHelmet() != null){
+						player.getInventory().getHelmet().setDurability((short) 0);
+					}
+					if(player.getInventory().getChestplate() != null){
+						player.getInventory().getChestplate().setDurability((short) 0);
+					}
+					if(player.getInventory().getLeggings() != null){
+						player.getInventory().getLeggings().setDurability((short) 0);
+					}
+					if(player.getInventory().getBoots() != null){
+						player.getInventory().getBoots().setDurability((short) 0);
+					}
 					
 					if(!main.provoked.containsKey(player.getName())){
 						ProvokedTask task = new ProvokedTask(player, damager);
@@ -240,16 +256,18 @@ public class Events implements Listener{
 	public void blockBreak(BlockBreakEvent event){
 		Player player = event.getPlayer();
 		PPlayer pplayer = new PPlayer(player);
-		if(main.jailed.containsKey(player.getName())){
-			event.setCancelled(true);
-			event.getBlock().setType(Material.AIR);
-			int blocks = main.jailed.get(player.getName());
-			main.jailed.remove(player.getName());
-			main.jailed.put(player.getName(), blocks + 1);
-			
-			if(main.jailed.get(player.getName()) >= Utils.getJailBlocksToMine()){
-				pplayer.removeFromJail();
-				pplayer.sendMessage("You've done your work prisoner. You're free... for now.");
+		if(Utils.canBreakHere(player, event.getBlock().getLocation()) == true){
+			if(main.jailed.containsKey(player.getName())){
+				event.setCancelled(true);
+				event.getBlock().setType(Material.AIR);
+				int blocks = main.jailed.get(player.getName());
+				main.jailed.remove(player.getName());
+				main.jailed.put(player.getName(), blocks + 1);
+				
+				if(main.jailed.get(player.getName()) >= Utils.getJailBlocksToMine()){
+					pplayer.removeFromJail();
+					pplayer.sendMessage("You've done your work prisoner. You're free... for now.");
+				}
 			}
 		}
 	}
@@ -315,6 +333,11 @@ public class Events implements Listener{
 		if(main.guards.contains(player.getName())){
 			pplayer.switchToSavedInventory(InventorySaveType.REGULAR);
 			main.guards.remove(player.getName());
+		}else if(main.combat.containsKey(player.getName())){
+			player.setHealth(0);
+			main.combat.get(player.getName()).cancel();
+			main.combat.remove(player.getName());
+			event.setQuitMessage(ChatColor.GOLD + UTFUtils.getArrow() + yellow + " " + player.getName() + gray + " has combat logged!");
 		}
 	}
 	

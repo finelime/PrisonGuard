@@ -169,6 +169,7 @@ public class PPlayer {
 	 * Set the player's inventory to their regular inventory
 	 * @param type - The inventory save type
 	 */
+	@SuppressWarnings("deprecation")
 	public void switchToSavedInventory(InventorySaveType type){
 		player.getInventory().clear();
 		player.getInventory().setHelmet(null);
@@ -207,6 +208,7 @@ public class PPlayer {
 	/**
 	 * Set the player's inventory to the guard inventory
 	 */
+	@SuppressWarnings("deprecation")
 	public void switchToGuardInventory(){
 		this.saveInventory(InventorySaveType.REGULAR);
 		player.getInventory().clear();

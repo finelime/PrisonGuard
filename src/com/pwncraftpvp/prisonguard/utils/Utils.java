@@ -3,18 +3,67 @@ package com.pwncraftpvp.prisonguard.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.md_5.bungee.api.ChatColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import com.pwncraftpvp.prisonguard.core.Main;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag.State;
 
 public class Utils {
 	
 	static Main main = Main.getInstance();
+	private static String gray = ChatColor.GRAY + "";
+	//private static String yellow = ChatColor.YELLOW + "";
+	
+	/**
+	 * Get the WorldGuardPlugin
+	 * @return - The WorldGuardPlugin
+	 */
+	public static WorldGuardPlugin getWorldGuard() {
+	    Plugin plugin = main.getServer().getPluginManager().getPlugin("WorldGuard");
+	 
+	    // WorldGuard may not be loaded
+	    if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
+	        return null; // Maybe you want throw an exception instead
+	    }
+	 
+	    return (WorldGuardPlugin) plugin;
+	}
+	
+	/**
+	 * Check if a player can build at the location	
+	 * @param player - The player to perform checks on
+	 * @return - True or false depending on if the player can build at the location or not
+	 */
+	public static boolean canBreakHere(Player player, Location loc){
+		return getWorldGuard().canBuild(player, loc);
+	}
+	
+	/**
+	 * Check if a location is in a pvp area
+	 * @param loc - The location to check
+	 * @return True or false depending on if the location is in a pvp area or not
+	 */
+	public static boolean canPvP(Location loc){
+		boolean can = true;
+		ApplicableRegionSet set = getWorldGuard().getRegionManager(loc.getWorld()).getApplicableRegions(loc);
+        if(set.getFlag(DefaultFlag.PVP) != null){
+        	if(set.getFlag(DefaultFlag.PVP) == State.DENY){
+            	can = false;
+        	}
+        }
+        return can;
+	}
 	
 	/**
 	 * Check if a string is also an integer
@@ -36,6 +85,16 @@ public class Utils {
 	 */
 	public static int getTotalIllegalItems(){
 		return main.getConfig().getInt("totalIllegalItems");
+	}
+	
+	/**
+	 * Broadcast a message to all players
+	 * @param message - The message to broadcast
+	 */
+	public static void broadcastMessage(String message){
+		for(Player p : Bukkit.getOnlinePlayers()){
+			p.sendMessage(ChatColor.GOLD + UTFUtils.getArrow() + gray + " " + message);
+		}
 	}
 	
 	/**
